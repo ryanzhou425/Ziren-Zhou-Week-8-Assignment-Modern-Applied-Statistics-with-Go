@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// 生成正态分布随机数（Box-Muller）
+// Generate normally distributed random number (Box-Muller transform)
 func randNorm(mean, stddev float64) float64 {
 	u1 := rand.Float64()
 	u2 := rand.Float64()
@@ -19,7 +19,7 @@ func randNorm(mean, stddev float64) float64 {
 	return z*stddev + mean
 }
 
-// 计算中位数
+// Calculate median
 func median(data []float64) float64 {
 	sort.Float64s(data)
 	n := len(data)
@@ -29,7 +29,7 @@ func median(data []float64) float64 {
 	return data[n/2]
 }
 
-// 计算标准差
+// Calculate standard deviation
 func stdDev(data []float64) float64 {
 	n := float64(len(data))
 	mean := 0.0
@@ -50,20 +50,20 @@ func main() {
 	var memStart, memEnd runtime.MemStats
 	runtime.ReadMemStats(&memStart)
 
-	rand.Seed(9999) // 固定种子，确保生成数据可复现
+	rand.Seed(9999)
 
-	n := 400  // ✅ 样本大小改为 400
-	B := 1000 // bootstrap 次数
+	n := 400
+	B := 1000
 	popMean := 100.0
 	popSD := 10.0
 
-	// 1. 生成原始样本
+	// Generate original sample
 	original := make([]float64, n)
 	for i := 0; i < n; i++ {
 		original[i] = randNorm(popMean, popSD)
 	}
 
-	// 2. 保存到 CSV 文件
+	// Save sample to CSV file
 	file, err := os.Create("original_data.csv")
 	if err != nil {
 		panic(err)
@@ -79,7 +79,7 @@ func main() {
 
 	fmt.Println("Saved original sample to original_data.csv")
 
-	// 3. 执行 bootstrap 并输出中位数标准误差
+	// Perform bootstrap and estimate standard error of the median
 	medians := make([]float64, B)
 	for b := 0; b < B; b++ {
 		sample := make([]float64, n)
@@ -93,7 +93,7 @@ func main() {
 	seMedian := stdDev(medians)
 	fmt.Printf("Estimated SE of Median (Go): %.5f\n", seMedian)
 
-	// 4. 记录总用时和内存
+	// Record total runtime and memory usage
 	runtime.ReadMemStats(&memEnd)
 	duration := time.Since(startTime)
 	memUsed := memEnd.Alloc - memStart.Alloc
